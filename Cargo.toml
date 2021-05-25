@@ -5,11 +5,9 @@ authors = ["Max Brown <mb39@sanger.ac.uk>"]
 edition = "2018"
 
 [dependencies]
-ndarray = "0.14.0"
 csv = "1.1.5"
 serde = {version = "1.0.123", features = ["derive"]}
 serde_derive = "1.0.126"
 plotters = "*"
-ndarray-stats = "0.4"
 colorous = "1.0.5"
 clap = "2.33.3"

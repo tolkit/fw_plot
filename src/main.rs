@@ -6,7 +6,6 @@ use std::error::Error;
 use std::fs::File;
 
 use fw_plot::plot::plot;
-use fw_plot::vec2arr::vec2arr;
 
 // read in the output of fasta_windows for kmer spectra
 #[derive(Clone, Debug, Deserialize)]
@@ -17,7 +16,7 @@ struct Record {
     nuc_list: Vec<u32>,
 }
 
-// TODO: add dimesions & other colour schemes as options
+// TODO: add dimensions & other colour schemes as options
 //     : output window size?
 //     : optional kmers on yaxis?
 
@@ -68,18 +67,11 @@ fn main() -> Result<(), Box<dyn Error>> {
     }
 
     for (k, v) in groups {
-        // key is the ID, value is the Vec<Vecu32>>
-        let v_array2 = vec2arr::vec_to_array(v);
-
-        let image_height = 856;
-        let image_width = 1024;
-        let image_dimensions: (u32, u32) = (image_width as u32, image_height as u32);
-
         let path = format!("{}/{}.png", outdir, k);
 
-        plot::plot_heatmap(&v_array2, image_dimensions, &path)?;
-
-        eprintln!("[+]\tHeatmap for {} at {}", k, path);
+        plot::plot(v, &path)?;
+        eprintln!("[+]\tHeatmap for {}.", k);
+        // eprintln!("[+]\tHeatmap for {} at {}", k, path);
     }
     Ok(())
 }
