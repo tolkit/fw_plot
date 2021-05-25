@@ -17,14 +17,35 @@ fn main() -> Result<(), Box<dyn Error>> {
         .about("Create fast and simple heatmaps of fasta_windows output.")
         .subcommand(
             clap::SubCommand::with_name("heatmap")
-                .about("Supply a di/tri/tetranucleotide TSV")
+                .about("Make a heatmap of the kmer frequencies across chromosomes.")
                 .arg(
                     Arg::with_name("tsv")
                         .short("t")
                         .long("tsv")
                         .takes_value(true)
                         .required(true)
-                        .help("The TSV file."),
+                        .help("The TSV file (..._di/tri/tetranuc_windows.tsv)."),
+                )
+                .arg(
+                    Arg::with_name("colour")
+                        .short("c")
+                        .long("colour")
+                        .takes_value(true)
+                        .required(true)
+                        .default_value("TURBO")
+                        // there are more... if there's appetite
+                        .possible_values(&[
+                            "TURBO",
+                            "VIRIDIS",
+                            "INFERNO",
+                            "MAGMA",
+                            "PLASMA",
+                            "CIVIDIS",
+                            "WARM",
+                            "COOL",
+                            "CUBEHELIX",
+                        ])
+                        .help("The colour scale that the heatmap uses. See https://docs.rs/colorous/1.0.5/colorous/."),
                 )
                 .arg(
                     Arg::with_name("outdir")
@@ -38,14 +59,14 @@ fn main() -> Result<(), Box<dyn Error>> {
         )
         .subcommand(
             clap::SubCommand::with_name("stat")
-                .about("Supply the main TSV, extract and plot a variable across chromosomes.")
+                .about("Quickly plot fundamental sequence statistics across chromosomes.")
                 .arg(
                     Arg::with_name("tsv")
                         .short("t")
                         .long("tsv")
                         .takes_value(true)
                         .required(true)
-                        .help("The TSV file."),
+                        .help("The TSV file (..._windows.tsv)."),
                 )
                 .arg(
                     Arg::with_name("variable")
@@ -53,6 +74,19 @@ fn main() -> Result<(), Box<dyn Error>> {
                         .long("variable")
                         .takes_value(true)
                         .required(true)
+                        .possible_values(&[
+                            "gc_prop",
+                            "gc_skew",
+                            "shannon_entropy",
+                            "prop_gs",
+                            "prop_cs",
+                            "prop_as",
+                            "prop_ts",
+                            "prop_ns",
+                            "dinucleotide_shannon",
+                            "trinucleotide_shannon",
+                            "tetranucleotide_shannon",
+                        ])
                         .help("The variable to plot."),
                 )
                 .arg(

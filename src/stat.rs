@@ -96,6 +96,15 @@ pub mod stat {
             .map(|(_x, y)| y)
             .fold(-1. / 0. /* -inf */, f32::max);
 
+        let y_min = match variable {
+            "gc_skew" => -1f32,
+            "shannon_entropy" => 1.5f32,
+            "dinucleotide_shannon" => 1.5f32,
+            "trinucleotide_shannon" => 1.5f32,
+            "tetranucleotide_shannon" => 1.5f32,
+            _ => 0f32,
+        };
+
         let root = BitMapBackend::new(path, (dims.0, dims.1)).into_drawing_area();
         root.fill(&WHITE)?;
         let root = root.margin(10, 10, 10, 10);
@@ -106,20 +115,24 @@ pub mod stat {
             .set_label_area_size(LabelAreaPosition::Left, (8).percent())
             .set_label_area_size(LabelAreaPosition::Bottom, (4).percent())
             // zero first value needs to be replaced by a minimum I think... for the Y
-            .build_cartesian_2d(0f32..max_x, 0f32..max_y)?;
+            .build_cartesian_2d(0f32..max_x, y_min..max_y)?;
 
         // Then we can draw a mesh
         chart
             .configure_mesh()
-            // We can customize the maximum number of labels allowed for each axis
             .y_desc(variable)
             .x_desc("Length along genome")
-            // We can also change the format of the label text
-            .y_label_formatter(&|x| format!("{:.3}", x))
+            .x_label_formatter(&|x| match x / 1000000.0 {
+                x_ if x_ > 1.0 => format!("{:.0}Mb", x / 1000000.0),
+                x_ if x_ < 0.1 => format!("{:.3}Mb", x / 1000000.0),
+                x_ if x_ < 0.01 => format!("{:.4}Mb", x / 1000000.0),
+                _ => format!("{:.0}Mb", x / 1000000.0),
+            })
+            .y_label_formatter(&|x| format!("{:.1}", x))
             .draw()?;
 
         // And we can draw something in the drawing area
-        chart.draw_series(LineSeries::new(data, &RED))?;
+        chart.draw_series(LineSeries::new(data, &BLACK))?;
 
         Ok(())
     }

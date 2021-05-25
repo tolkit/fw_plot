@@ -21,6 +21,7 @@ pub mod heatmap {
         // parse command line options
         let tsv = matches.value_of("tsv").unwrap();
         let outdir = matches.value_of("outdir").unwrap();
+        let colour = matches.value_of("colour").unwrap();
         // Read an array back from the file
         let file = File::open(tsv)?;
 
@@ -44,18 +45,32 @@ pub mod heatmap {
 
         for (k, v) in groups {
             let path = format!("{}/{}.png", outdir, k);
-            heatmap(v, &path)?;
+            heatmap(v, &path, colour)?;
             eprintln!("[+]\tHeatmap for {} at {}", k, path);
         }
         Ok(())
     }
 
-    fn heatmap(data: Vec<Vec<u32>>, path: &str) -> Result<(), Box<dyn std::error::Error>> {
+    fn heatmap(
+        data: Vec<Vec<u32>>,
+        path: &str,
+        colour: &str,
+    ) -> Result<(), Box<dyn std::error::Error>> {
         // dimensions of the plot
         let dims = (1280, 2 * 480);
         // colour scale
-        let color_scale = colorous::TURBO;
-
+        let color_scale = match colour {
+            "TURBO" => colorous::TURBO,
+            "VIRIDIS" => colorous::VIRIDIS,
+            "INFERNO" => colorous::INFERNO,
+            "MAGMA" => colorous::MAGMA,
+            "PLASMA" => colorous::PLASMA,
+            "CIVIDIS" => colorous::CIVIDIS,
+            "WARM" => colorous::WARM,
+            "COOL" => colorous::COOL,
+            "CUBEHELIX" => colorous::CUBEHELIX,
+            _ => colorous::TURBO,
+        };
         // the root of the plot - bitmap is cheap to compute
         let root = BitMapBackend::new(path, (dims.0, dims.1)).into_drawing_area();
         root.fill(&WHITE)?;
