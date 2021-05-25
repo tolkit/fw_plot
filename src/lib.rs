@@ -1,1 +1,2 @@
-pub mod plot;
+pub mod heatmap;
+pub mod stat;

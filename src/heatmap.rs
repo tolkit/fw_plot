@@ -1,8 +1,56 @@
-pub mod plot {
+pub mod heatmap {
 
+    // use clap::value_t;
+    use csv::ReaderBuilder;
     use plotters::prelude::*;
+    use serde::Deserialize;
+    use std::collections::BTreeMap;
+    use std::fs::File;
 
-    pub fn plot(data: Vec<Vec<u32>>, path: &str) -> Result<(), Box<dyn std::error::Error>> {
+    // read in the output of fasta_windows for kmer spectra
+    // should throw an error if wrong TSV used..?
+    #[derive(Clone, Debug, Deserialize)]
+    struct Record {
+        id: String,
+        start: i32,
+        end: i32,
+        nuc_list: Option<Vec<u32>>,
+    }
+
+    pub fn plot_heatmap(matches: &clap::ArgMatches) -> Result<(), Box<dyn std::error::Error>> {
+        // parse command line options
+        let tsv = matches.value_of("tsv").unwrap();
+        let outdir = matches.value_of("outdir").unwrap();
+        // Read an array back from the file
+        let file = File::open(tsv)?;
+
+        // deserialize the tsv into a readerbuilder
+        let mut reader = ReaderBuilder::new()
+            .flexible(true)
+            .has_headers(false)
+            .delimiter(b'\t')
+            .from_reader(file);
+
+        // group the tsv into same ID's
+        eprintln!("[+]\tMaking BTreeMap of TSV, grouped by ID.");
+        let mut groups = BTreeMap::new();
+        for result in reader.deserialize() {
+            let record: Record = result?;
+            let key = record.id;
+            // this option may be unsafe here.
+            let value = record.nuc_list.unwrap();
+            groups.entry(key).or_insert(Vec::new()).push(value);
+        }
+
+        for (k, v) in groups {
+            let path = format!("{}/{}.png", outdir, k);
+            heatmap(v, &path)?;
+            eprintln!("[+]\tHeatmap for {} at {}", k, path);
+        }
+        Ok(())
+    }
+
+    fn heatmap(data: Vec<Vec<u32>>, path: &str) -> Result<(), Box<dyn std::error::Error>> {
         // dimensions of the plot
         let dims = (1280, 2 * 480);
         // colour scale
