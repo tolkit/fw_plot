@@ -117,10 +117,25 @@ pub mod stat {
             // zero first value needs to be replaced by a minimum I think... for the Y
             .build_cartesian_2d(0f32..max_x, y_min..max_y)?;
 
+        let format_variable = match variable {
+            "gc_prop" => "GC proportion",
+            "gc_skew" => "GC skew",
+            "shannon_entropy" => "Shannon entropy",
+            "prop_gs" => "Proportion of G's",
+            "prop_cs" => "Proportion of C's",
+            "prop_as" => "Proportion of A's",
+            "prop_ts" => "Proportion of T's",
+            "prop_ns" => "Proportion of N's",
+            "dinucleotide_shannon" => "Dinucleotide shannon diversity",
+            "trinucleotide_shannon" => "Trinucleotide shannon diversity",
+            "tetranucleotide_shannon" => "Tetranucleotide shannon diversity",
+            _ => variable,
+        };
+
         // Then we can draw a mesh
         chart
             .configure_mesh()
-            .y_desc(variable)
+            .y_desc(format_variable)
             .x_desc("Length along genome")
             .x_label_formatter(&|x| match x / 1000000.0 {
                 // if greater than megabase, 1 decimal place
