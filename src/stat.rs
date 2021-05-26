@@ -113,7 +113,7 @@ pub mod stat {
             .x_label_area_size(20)
             .y_label_area_size(40)
             .set_label_area_size(LabelAreaPosition::Left, (8).percent())
-            .set_label_area_size(LabelAreaPosition::Bottom, (4).percent())
+            .set_label_area_size(LabelAreaPosition::Bottom, (8).percent())
             // zero first value needs to be replaced by a minimum I think... for the Y
             .build_cartesian_2d(0f32..max_x, y_min..max_y)?;
 
@@ -123,11 +123,14 @@ pub mod stat {
             .y_desc(variable)
             .x_desc("Length along genome")
             .x_label_formatter(&|x| match x / 1000000.0 {
-                x_ if x_ > 1.0 => format!("{:.0}Mb", x / 1000000.0),
-                x_ if x_ < 0.1 => format!("{:.3}Mb", x / 1000000.0),
-                x_ if x_ < 0.01 => format!("{:.4}Mb", x / 1000000.0),
+                // if greater than megabase, 1 decimal place
+                x_ if x_ >= 1.0 => format!("{:.1}Mb", x / 1000000.0),
+                // if less than 100kb
+                x_ if x_ < 0.1 => format!("{:.0}Kb", x / 1000.0),
+                // otherwise, no decimal places
                 _ => format!("{:.0}Mb", x / 1000000.0),
             })
+            .label_style(TextStyle::from(("sans-serif", 25)))
             .y_label_formatter(&|x| format!("{:.1}", x))
             .draw()?;
 

@@ -1,5 +1,10 @@
 pub mod heatmap {
 
+    // TODO: add dimensions & other colour schemes as options
+    //     : output window size?
+    //     : optional kmers on yaxis?
+    //     : AA at bottom, TT at top of yaxis
+
     // use clap::value_t;
     use csv::ReaderBuilder;
     use plotters::prelude::*;
@@ -126,9 +131,6 @@ pub mod heatmap {
 
         let highest_frequency = *flatten(data.clone()).iter().max().unwrap();
 
-        let mut top_left = 0.0;
-        let bottom_right = 1.0;
-
         for (window, data_per_window) in data.into_iter().enumerate() {
             for (kmer, frequency) in data_per_window.into_iter().enumerate() {
                 // otherwise the last kmer width is 1 pixel for some reason.
@@ -138,8 +140,9 @@ pub mod heatmap {
                     (frequency as f64).sqrt() / (highest_frequency as f64).sqrt();
                 let color = color_scale.eval_continuous(frequency_scaled);
 
-                top_left = 1.0;
-                // ew all those f32's
+                let mut top_left = 1.0;
+                let bottom_right = 1.0;
+                // forgot why I needed this
                 if kmer == y_len as usize {
                     top_left = 0.0;
                 }

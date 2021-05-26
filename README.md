@@ -4,7 +4,7 @@ A command line tool to take the output of fasta windows and make some fast plots
 
 ## Usage
 
-Build as all rust projects: `cargo build --release`. The executable is in `./target/release/fw_plot`
+Build as all rust projects: `cargo build --release`. The executable is in `./target/release/fw_plot`.
 
 ```
 fw_plot 0.1.0
@@ -84,10 +84,10 @@ OPTIONS:
 
 Run with `fw_plot stat -t ilPie_windows.tsv -v gc_prop -o ./stats`
 
-SUPER_16 of *Pieris rapae*:
+SUPER_16 GC proportion in *Pieris rapae*:
 
 <img src="./stats/SUPER_16.png">
 
-And the mitochondrion:
+And in the mitochondrion:
 
 <img src="./stats/scaffold_MT.png">

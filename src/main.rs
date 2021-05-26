@@ -5,11 +5,6 @@ use std::process;
 use fw_plot::heatmap::heatmap;
 use fw_plot::stat::stat;
 
-// TODO: add dimensions & other colour schemes as options
-//     : output window size?
-//     : optional kmers on yaxis?
-//     : AA at bottom, TT at top of yaxis
-
 fn main() -> Result<(), Box<dyn Error>> {
     let matches = App::new("fw_plot")
         .version(clap::crate_version!())
