@@ -2,6 +2,7 @@ use clap::{App, Arg};
 use std::error::Error;
 use std::process;
 
+use fw_plot::corr::corr;
 use fw_plot::heatmap::heatmap;
 use fw_plot::stat::stat;
 
@@ -94,6 +95,69 @@ fn main() -> Result<(), Box<dyn Error>> {
                         .help("The output directory."),
                 ),
         )
+        .subcommand(
+            clap::SubCommand::with_name("corr")
+                .about("Quickly plot correlations between fundamental sequence statistics.")
+                .arg(
+                    Arg::with_name("tsv")
+                        .short("t")
+                        .long("tsv")
+                        .takes_value(true)
+                        .required(true)
+                        .help("The TSV file (..._windows.tsv)."),
+                )
+                .arg(
+                    Arg::with_name("x_variable")
+                        .short("x")
+                        .long("x_variable")
+                        .takes_value(true)
+                        .required(true)
+                        .possible_values(&[
+                            "gc_prop",
+                            "gc_skew",
+                            "shannon_entropy",
+                            "prop_gs",
+                            "prop_cs",
+                            "prop_as",
+                            "prop_ts",
+                            "prop_ns",
+                            "dinucleotide_shannon",
+                            "trinucleotide_shannon",
+                            "tetranucleotide_shannon",
+                        ])
+                        .help("The x variable to plot."),
+                )
+                .arg(
+                    Arg::with_name("y_variable")
+                        .short("y")
+                        .long("y_variable")
+                        .takes_value(true)
+                        .required(true)
+                        .possible_values(&[
+                            "gc_prop",
+                            "gc_skew",
+                            "shannon_entropy",
+                            "prop_gs",
+                            "prop_cs",
+                            "prop_as",
+                            "prop_ts",
+                            "prop_ns",
+                            "dinucleotide_shannon",
+                            "trinucleotide_shannon",
+                            "tetranucleotide_shannon",
+                        ])
+                        .help("The y variable to plot."),
+                )
+                .arg(
+                    Arg::with_name("outdir")
+                        .short("o")
+                        .long("outdir")
+                        .takes_value(true)
+                        .required(true)
+                        .default_value(".")
+                        .help("The output directory."),
+                ),
+        )
         .get_matches();
 
     let subcommand = matches.subcommand();
@@ -105,6 +169,10 @@ fn main() -> Result<(), Box<dyn Error>> {
         "stat" => {
             let matches = subcommand.1.unwrap();
             stat::plot_stat(matches)?;
+        }
+        "corr" => {
+            let matches = subcommand.1.unwrap();
+            corr::plot_corr(matches)?;
         }
         _ => {
             println!(

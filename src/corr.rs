@@ -1,4 +1,6 @@
-pub mod stat {
+pub mod corr {
+
+    // corr plot code will be very similar to `stat`
 
     use csv::ReaderBuilder;
     use plotters::prelude::*;
@@ -28,10 +30,16 @@ pub mod stat {
         tetranucleotide_shannon: f32,
     }
 
-    pub fn plot_stat(matches: &clap::ArgMatches) -> Result<(), Box<dyn std::error::Error>> {
+    pub fn plot_corr(matches: &clap::ArgMatches) -> Result<(), Box<dyn std::error::Error>> {
         // parse command line options
         let tsv = matches.value_of("tsv").unwrap();
-        let variable = matches.value_of("variable").unwrap();
+        let x_variable = matches.value_of("x_variable").unwrap();
+        let y_variable = matches.value_of("y_variable").unwrap();
+
+        if x_variable == y_variable {
+            eprintln!("[-]\tBoth x & y variables are the same!");
+        }
+
         let outdir = matches.value_of("outdir").unwrap();
         // Read an array back from the file
         let file = File::open(tsv)?;
@@ -51,10 +59,8 @@ pub mod stat {
         for result in reader.deserialize().skip(1) {
             let record: Record = result?;
             let key = record.id;
-            // only need either start or end...
-            let start = record.start;
 
-            let var = match variable {
+            let x_var = match x_variable {
                 "gc_prop" => record.gc_prop,
                 "gc_skew" => record.gc_skew,
                 "shannon_entropy" => record.shannon_entropy,
@@ -66,23 +72,39 @@ pub mod stat {
                 "dinucleotide_shannon" => record.dinucleotide_shannon,
                 "trinucleotide_shannon" => record.trinucleotide_shannon,
                 "tetranucleotide_shannon" => record.tetranucleotide_shannon,
-                _ => panic!("Variable {} not covered.", variable),
+                _ => panic!("Variable {} not covered.", x_variable),
             };
 
-            groups.entry(key).or_insert(Vec::new()).push((start, var));
+            let y_var = match y_variable {
+                "gc_prop" => record.gc_prop,
+                "gc_skew" => record.gc_skew,
+                "shannon_entropy" => record.shannon_entropy,
+                "prop_gs" => record.prop_gs,
+                "prop_cs" => record.prop_cs,
+                "prop_as" => record.prop_as,
+                "prop_ts" => record.prop_ts,
+                "prop_ns" => record.prop_ns,
+                "dinucleotide_shannon" => record.dinucleotide_shannon,
+                "trinucleotide_shannon" => record.trinucleotide_shannon,
+                "tetranucleotide_shannon" => record.tetranucleotide_shannon,
+                _ => panic!("Variable {} not covered.", y_variable),
+            };
+
+            groups.entry(key).or_insert(Vec::new()).push((x_var, y_var));
         }
         for (k, v) in groups {
             let path = format!("{}/{}.png", outdir, k);
-            statmap(v, &path, variable)?;
+            corr(v, &path, x_variable, y_variable)?;
             eprintln!("[+]\tStatmap for {} at {}", k, path);
         }
         Ok(())
     }
 
-    fn statmap(
+    fn corr(
         data: Vec<(f32, f32)>,
         path: &str,
-        variable: &str,
+        x_var: &str,
+        y_var: &str,
     ) -> Result<(), Box<dyn std::error::Error>> {
         // dimensions of the plot
         let dims = (1280, 2 * 480);
@@ -104,7 +126,7 @@ pub mod stat {
             // zero first value needs to be replaced by a minimum I think... for the Y
             .build_cartesian_2d(x_max_min.min..x_max_min.max, y_max_min.min..y_max_min.max)?;
 
-        let format_variable = match variable {
+        let format_variable_x = match x_var {
             "gc_prop" => "GC proportion",
             "gc_skew" => "GC skew",
             "shannon_entropy" => "Shannon entropy",
@@ -116,28 +138,35 @@ pub mod stat {
             "dinucleotide_shannon" => "Dinucleotide shannon diversity",
             "trinucleotide_shannon" => "Trinucleotide shannon diversity",
             "tetranucleotide_shannon" => "Tetranucleotide shannon diversity",
-            _ => variable,
+            _ => x_var,
+        };
+
+        let format_variable_y = match y_var {
+            "gc_prop" => "GC proportion",
+            "gc_skew" => "GC skew",
+            "shannon_entropy" => "Shannon entropy",
+            "prop_gs" => "Proportion of G's",
+            "prop_cs" => "Proportion of C's",
+            "prop_as" => "Proportion of A's",
+            "prop_ts" => "Proportion of T's",
+            "prop_ns" => "Proportion of N's",
+            "dinucleotide_shannon" => "Dinucleotide shannon diversity",
+            "trinucleotide_shannon" => "Trinucleotide shannon diversity",
+            "tetranucleotide_shannon" => "Tetranucleotide shannon diversity",
+            _ => y_var,
         };
 
         // Then we can draw a mesh
         chart
             .configure_mesh()
-            .y_desc(format_variable)
-            .x_desc("Length along genome")
-            .x_label_formatter(&|x| match x / 1000000.0 {
-                // if greater than megabase, 1 decimal place
-                x_ if x_ >= 1.0 => format!("{:.1}Mb", x / 1000000.0),
-                // if less than 100kb
-                x_ if x_ < 0.1 => format!("{:.0}Kb", x / 1000.0),
-                // otherwise, no decimal places
-                _ => format!("{:.0}Mb", x / 1000000.0),
-            })
+            .y_desc(format_variable_y)
+            .x_desc(format_variable_x)
             .label_style(TextStyle::from(("sans-serif", 25)))
-            .y_label_formatter(&|x| format!("{:.2}", x))
+            .y_label_formatter(&|x| format!("{:.1}", x))
             .draw()?;
 
         // And we can draw something in the drawing area
-        chart.draw_series(LineSeries::new(data, &BLACK))?;
+        chart.draw_series(data.iter().map(|(x, y)| Circle::new((*x, *y), 2, &BLACK)))?;
 
         Ok(())
     }
