@@ -122,7 +122,7 @@ OPTIONS:
 
 Run with `fw_plot corr -t ilPie_windows.tsv -x gc_prop -y tetranucleotide_shannon -o ./corr`
 
-SUPER_16 GC proportion in *Pieris rapae*:
+SUPER_16 GC proportion vs tetranucleotide shannon diversity across 1kb windows in *Pieris rapae*:
 
 <img src="./corr/SUPER_16.png">
 
