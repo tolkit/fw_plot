@@ -10,7 +10,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let matches = App::new("fw_plot")
         .version(clap::crate_version!())
         .author("Max Brown <mb39@sanger.ac.uk>")
-        .about("Create fast and simple heatmaps of fasta_windows output.")
+        .about("Create fast and simple plots of fasta_windows output.")
         .subcommand(
             clap::SubCommand::with_name("heatmap")
                 .about("Make a heatmap of the kmer frequencies across chromosomes.")

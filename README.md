@@ -7,9 +7,9 @@ A command line tool to take the output of fasta windows and make some fast plots
 Build as all rust projects: `cargo build --release`. The executable is in `./target/release/fw_plot`.
 
 ```
-fw_plot 0.1.0
+fw_plot 0.1.1
 Max Brown <mb39@sanger.ac.uk>
-Create fast and simple heatmaps of fasta_windows output.
+Create fast and simple plots of fasta_windows output.
 
 USAGE:
     fw_plot [SUBCOMMAND]
@@ -19,6 +19,7 @@ FLAGS:
     -V, --version    Prints version information
 
 SUBCOMMANDS:
+    corr       Quickly plot correlations between fundamental sequence statistics.
     heatmap    Make a heatmap of the kmer frequencies across chromosomes.
     help       Prints this message or the help of the given subcommand(s)
     stat       Quickly plot fundamental sequence statistics across chromosomes.
@@ -91,3 +92,40 @@ SUPER_16 GC proportion in *Pieris rapae*:
 And in the mitochondrion:
 
 <img src="./stats/scaffold_MT.png">
+
+
+### Plot correlations from fasta_windows
+
+```
+fw_plot-corr 
+Quickly plot correlations between fundamental sequence statistics.
+
+USAGE:
+    fw_plot corr --outdir <outdir> --tsv <tsv> --x_variable <x_variable> --y_variable <y_variable>
+
+FLAGS:
+    -h, --help       Prints help information
+    -V, --version    Prints version information
+
+OPTIONS:
+    -o, --outdir <outdir>            The output directory. [default: .]
+    -t, --tsv <tsv>                  The TSV file (..._windows.tsv).
+    -x, --x_variable <x_variable>    The x variable to plot. [possible values: gc_prop, gc_skew, shannon_entropy,
+                                     prop_gs, prop_cs, prop_as, prop_ts, prop_ns, dinucleotide_shannon,
+                                     trinucleotide_shannon, tetranucleotide_shannon]
+    -y, --y_variable <y_variable>    The y variable to plot. [possible values: gc_prop, gc_skew, shannon_entropy,
+                                     prop_gs, prop_cs, prop_as, prop_ts, prop_ns, dinucleotide_shannon,
+                                     trinucleotide_shannon, tetranucleotide_shannon]
+```
+
+#### Examples
+
+Run with `fw_plot corr -t ilPie_windows.tsv -x gc_prop -y tetranucleotide_shannon -o ./corr`
+
+SUPER_16 GC proportion in *Pieris rapae*:
+
+<img src="./corr/SUPER_16.png">
+
+And in the W:
+
+<img src="./corr/SUPER_W.png">
