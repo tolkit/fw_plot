@@ -93,7 +93,16 @@ fn main() -> Result<(), Box<dyn Error>> {
                         .required(true)
                         .default_value(".")
                         .help("The output directory."),
-                ),
+                )
+                .arg(
+                    Arg::with_name("loess")
+                        .short("l")
+                        .long("loess")
+                        .takes_value(true)
+                        .required(true)
+                        .default_value("false")
+                        .help("Should a loess fit be added?"),
+                )
         )
         .subcommand(
             clap::SubCommand::with_name("corr")
