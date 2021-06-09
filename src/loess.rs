@@ -11,7 +11,6 @@ pub mod loess {
 
     // TODO: make this code safer!
 
-    // see lowess.h and translate over.
     fn pow2<T>(x: T) -> T
     where
         T: std::ops::Mul<T, Output = T> + Copy,

@@ -7,7 +7,7 @@ A command line tool to take the output of fasta windows and make some fast plots
 Build as all rust projects: `cargo build --release`. The executable is in `./target/release/fw_plot`.
 
 ```
-fw_plot 0.1.1
+fw_plot 0.1.2
 Max Brown <mb39@sanger.ac.uk>
 Create fast and simple plots of fasta_windows output.
 
@@ -62,18 +62,21 @@ And the mitochondrion:
 
 ### Plot output statistics from fasta_windows
 
+I've added a primitive implementation of a loess fit. *TODO* maybe change style of this slightly. Add user defined params.
+
 ```
 fw_plot-stat 
 Quickly plot fundamental sequence statistics across chromosomes.
 
 USAGE:
-    fw_plot stat --outdir <outdir> --tsv <tsv> --variable <variable>
+    fw_plot stat --loess <loess> --outdir <outdir> --tsv <tsv> --variable <variable>
 
 FLAGS:
     -h, --help       Prints help information
     -V, --version    Prints version information
 
 OPTIONS:
+    -l, --loess <loess>          Should a loess fit be added?  [default: false]
     -o, --outdir <outdir>        The output directory. [default: .]
     -t, --tsv <tsv>              The TSV file (..._windows.tsv).
     -v, --variable <variable>    The variable to plot. [possible values: gc_prop, gc_skew, shannon_entropy, prop_gs,
@@ -83,13 +86,13 @@ OPTIONS:
 
 #### Examples
 
-Run with `fw_plot stat -t ilPie_windows.tsv -v gc_prop -o ./stats`
+Run with `fw_plot stat -t ilPie_windows.tsv -v gc_prop -o ./stats -l true`
 
 SUPER_16 GC proportion in *Pieris rapae*:
 
 <img src="./stats/SUPER_16.png">
 
-And in the mitochondrion:
+And in the mitochondrion - the loess fit is not good here!
 
 <img src="./stats/scaffold_MT.png">
 
