@@ -4,7 +4,7 @@ A command line tool to take the output of fasta windows and make some fast plots
 
 ## Usage
 
-Build as all rust projects: `cargo build --release`. The executable is in `./target/release/fw_plot`.
+Build as all rust (--bin) projects: `cargo build --release`. The executable is in `./target/release/fw_plot`.
 
 ```
 fw_plot 0.1.2
@@ -62,31 +62,36 @@ And the mitochondrion:
 
 ### Plot output statistics from fasta_windows
 
-I've added a primitive implementation of a loess fit. *TODO* maybe change style of this slightly. Add user defined params.
-
 ```
 fw_plot-stat 
 Quickly plot fundamental sequence statistics across chromosomes.
 
 USAGE:
-    fw_plot stat --loess <loess> --outdir <outdir> --tsv <tsv> --variable <variable>
+    fw_plot stat [OPTIONS] --circle_size <circle_size> --delta <delta> --frac <frac> --loess <loess> --nsteps <nsteps> --outdir <outdir> --tsv <tsv> --variable <variable>
 
 FLAGS:
     -h, --help       Prints help information
     -V, --version    Prints version information
 
 OPTIONS:
-    -l, --loess <loess>          Should a loess fit be added?  [default: false]
-    -o, --outdir <outdir>        The output directory. [default: .]
-    -t, --tsv <tsv>              The TSV file (..._windows.tsv).
-    -v, --variable <variable>    The variable to plot. [possible values: gc_prop, gc_skew, shannon_entropy, prop_gs,
-                                 prop_cs, prop_as, prop_ts, prop_ns, dinucleotide_shannon, trinucleotide_shannon,
-                                 tetranucleotide_shannon]
+    -c, --circle_size <circle_size>      Size of circles. Only relevant if loess == true. [default: 3]
+    -d, --delta <delta>                  Smoothing parameter #3. Not sure what this does. [default: 0.2]
+    -f, --frac <frac>                    Smoothing parameter #1. Lower values make more wiggly loess line. [default:
+                                         0.07]
+    -l, --loess <loess>                  Should a loess fit be added? [default: false]  [possible values: true, false]
+    -n, --nsteps <nsteps>                Robustness iterations - larger values significantly slower runtime. [default:
+                                         0]
+    -o, --outdir <outdir>                The output directory. [default: .]
+    -s, --stroke_width <stroke_width>    Stroke width of the loess line. [default: 2]
+    -t, --tsv <tsv>                      The TSV file (..._windows.tsv).
+    -v, --variable <variable>            The variable to plot. [possible values: gc_prop, gc_skew, shannon_entropy,
+                                         prop_gs, prop_cs, prop_as, prop_ts, prop_ns, dinucleotide_shannon,
+                                         trinucleotide_shannon, tetranucleotide_shannon]
 ```
 
 #### Examples
 
-Run with `fw_plot stat -t ilPie_windows.tsv -v gc_prop -o ./stats -l true`
+Run with `fw_plot stat -t ./data/ilPie_windows.tsv -v gc_prop -l true -o ./stats`
 
 SUPER_16 GC proportion in *Pieris rapae*:
 

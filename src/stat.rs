@@ -35,7 +35,22 @@ pub mod stat {
         let tsv = matches.value_of("tsv").unwrap();
         let variable = matches.value_of("variable").unwrap();
         let outdir = matches.value_of("outdir").unwrap();
+
+        // loess options
         let loess = value_t!(matches.value_of("loess"), bool).unwrap_or_else(|e| e.exit());
+        // 0.07
+        let frac = value_t!(matches.value_of("frac"), f64).unwrap_or_else(|e| e.exit());
+        // 8 - larger == slower.
+        let nsteps = value_t!(matches.value_of("nsteps"), i32).unwrap_or_else(|e| e.exit());
+        // 0.2
+        let delta = value_t!(matches.value_of("delta"), f64).unwrap_or_else(|e| e.exit());
+
+        // drawing options, default 3
+        let circle_size =
+            value_t!(matches.value_of("circle_size"), i32).unwrap_or_else(|e| e.exit());
+        // default if loess (6), default without loess (2)
+        let stroke_width =
+            value_t!(matches.value_of("stroke_width"), u32).unwrap_or_else(|e| e.exit());
 
         // Read an array back from the file
         let file = File::open(tsv)?;
@@ -77,7 +92,17 @@ pub mod stat {
         }
         for (k, v) in groups {
             let path = format!("{}/{}.png", outdir, k);
-            statmap(v, &path, variable, loess)?;
+            statmap(
+                v,
+                &path,
+                variable,
+                loess,
+                frac,
+                nsteps,
+                delta,
+                circle_size,
+                stroke_width,
+            )?;
             eprintln!("[+]\tStatmap for {} at {}", k, path);
         }
         Ok(())
@@ -88,6 +113,11 @@ pub mod stat {
         path: &str,
         variable: &str,
         loess: bool,
+        frac: f64,
+        nsteps: i32,
+        delta: f64,
+        circle_size: i32,
+        stroke_width: u32,
     ) -> Result<(), Box<dyn std::error::Error>> {
         // dimensions of the plot
         let dims = (1280, 2 * 480);
@@ -104,7 +134,7 @@ pub mod stat {
             let y_loess: Vec<f64> = data.clone().into_iter().map(|(_x, y)| y as f64).collect();
 
             // TODO: let user modify these parameters if they want.
-            let loess_res = loess::loess_wrapper(&x_loess, &y_loess, 0.1, 1, 1.0);
+            let loess_res = loess::loess_wrapper(&x_loess, &y_loess, frac, nsteps, delta);
 
             loess_res_tuple = x_loess
                 .iter()
@@ -158,10 +188,20 @@ pub mod stat {
             .draw()?;
 
         // And we can draw something in the drawing area
-        chart.draw_series(LineSeries::new(data, &BLACK))?;
 
-        if loess {
-            chart.draw_series(LineSeries::new(loess_res_tuple, &RED))?;
+        if !loess {
+            // normal jaggedy line plot
+            chart.draw_series(LineSeries::new(data, &BLACK))?;
+        } else {
+            // points now circles, and a loess fit through the middle
+            chart.draw_series(
+                data.iter()
+                    .map(|(x, y)| Circle::new((*x, *y), circle_size, &BLACK)),
+            )?;
+            chart.draw_series(LineSeries::new(
+                loess_res_tuple,
+                RED.stroke_width(stroke_width),
+            ))?;
         }
 
         Ok(())

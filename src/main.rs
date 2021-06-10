@@ -101,7 +101,53 @@ fn main() -> Result<(), Box<dyn Error>> {
                         .takes_value(true)
                         .required(true)
                         .default_value("false")
+                        .possible_values(&["true", "false"])
                         .help("Should a loess fit be added?"),
+                )
+                .arg(
+                    Arg::with_name("frac")
+                        .short("f")
+                        .long("frac")
+                        .takes_value(true)
+                        .required(true)
+                        .default_value("0.07")
+                        .help("Smoothing parameter #1. Lower values make more wiggly loess line."),
+                )
+                .arg(
+                    Arg::with_name("nsteps")
+                        .short("n")
+                        .long("nsteps")
+                        .takes_value(true)
+                        .required(true)
+                        .default_value("0")
+                        .help("Robustness iterations - larger values significantly slower runtime."),
+                )
+                .arg(
+                    Arg::with_name("delta")
+                        .short("d")
+                        .long("delta")
+                        .takes_value(true)
+                        .required(true)
+                        .default_value("0.2")
+                        .help("Smoothing parameter #3. Not sure what this does."),
+                )
+                .arg(
+                    Arg::with_name("stroke_width")
+                        .short("s")
+                        .long("stroke_width")
+                        .takes_value(true)
+                        .required(false)
+                        .default_value("2")
+                        .help("Stroke width of the loess line."),
+                )
+                .arg(
+                    Arg::with_name("circle_size")
+                        .short("c")
+                        .long("circle_size")
+                        .takes_value(true)
+                        .required(true)
+                        .default_value( "3")
+                        .help("Size of circles. Only relevant if loess == true."),
                 )
         )
         .subcommand(
@@ -184,8 +230,8 @@ fn main() -> Result<(), Box<dyn Error>> {
             corr::plot_corr(matches)?;
         }
         _ => {
-            println!(
-                "Subcommand invalid, run with '--help' or '-h' for subcommand options. Exiting."
+            eprintln!(
+                "[-]\tSubcommand invalid, run with '--help' or '-h' for subcommand options. Exiting."
             );
             process::exit(1);
         }

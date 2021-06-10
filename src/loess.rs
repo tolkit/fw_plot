@@ -4,7 +4,7 @@ pub mod loess {
 
     // disclaimer: It's not 100% right, as I was translating it, but understood almost nothing
     // so the tests done in the repo above ^ do not match what I was getting.
-    // however, the result looks reasonable..?
+    // however, the result looks reasonable on a plot..?
 
     // I may go back and annotate however
     // I'm also fairly certain this is the first public rust port of a loess function.
